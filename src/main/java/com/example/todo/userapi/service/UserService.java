@@ -1,16 +1,15 @@
 package com.example.todo.userapi.service;
 
+import com.example.todo.userapi.dto.request.LoginRequestDTO;
+import com.example.todo.userapi.dto.request.UserSignUpRequestDTO;
+import com.example.todo.userapi.dto.response.UserSignUpResponseDTO;
 import com.example.todo.userapi.entity.User;
 import com.example.todo.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
    private final UserRepository userRepository;
+   private final PasswordEncoder passwordEncoder;
 
 
    public boolean isDuplicate(String email) {
@@ -28,10 +28,35 @@ public class UserService {
       } else return false;
 
 
+   }
+
+   public UserSignUpResponseDTO create(final UserSignUpRequestDTO dto) throws Exception {
+      String email = dto.getEmail();
+
+      if (isDuplicate(email)) {
+         throw new RuntimeException("중복된 이메일 입니다.");
+      }
+
+      // 패스원드 인코딩
+      String encoded = passwordEncoder.encode(dto.getPassword());
+      dto.setPassword(encoded);
+
+      //dto를 User Entity로 변환해서 저장.
+      User saved = userRepository.save(dto.toEntity());
+      log.info("회원 가입 정상 수행되! - saved user - {}", saved);
+
+      return new UserSignUpResponseDTO(saved);
+
 
    }
 
 
+   public void login(LoginRequestDTO dto) {
+      String email = dto.getEmail();
+
+      String password = dto.getPassword();
+
+   }
 }
 
 
