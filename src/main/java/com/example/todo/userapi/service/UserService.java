@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -50,13 +52,34 @@ public class UserService {
 
    }
 
+   public String authenticate(final LoginRequestDTO dto) {
 
-   public void login(LoginRequestDTO dto) {
-      String email = dto.getEmail();
+      // 이메일을 통해 회원 정보 조회
+      User user = userRepository.findByEmail(dto.getEmail())
+            .orElseThrow(() -> new RuntimeException("존재하지 않는 아이디 입니다."));
+      
+      // 패스워드 검증
+      String rawPassword = dto.getPassword(); // 입력한 비번
+      String encodedPassword = user.getPassword(); // DB에 저장된 암호화된 비번
 
-      String password = dto.getPassword();
+      if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+         throw new RuntimeException("비밀번호가 틀렸습니다.");
+      }
 
+      log.info("{}님 로그인 성공!", user.getUserName());
+
+      //로그인 성공 후에 클라이언트에게 뭘 리턴해 줄 것인가?
+      // -> JWT를 클라이언트에 발급해 주어야 한다! -> 로그인 유지를 위해!
+
+
+
+
+      return "SUCCESS";
    }
+
+
+
+
 }
 
 

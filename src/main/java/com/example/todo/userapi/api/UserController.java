@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,10 +41,8 @@ public class UserController {
                                    BindingResult result) {
       log.info("/api/auth POST! - {}", dto);
 
-      if (result.hasErrors()) {
-         log.warn(result.toString());
-         return ResponseEntity.badRequest().body(result.getFieldError());
-      }
+      ResponseEntity<FieldError> resultEntity = getFieldErrorResponseEntity(result);
+      if (resultEntity != null) return resultEntity;
 
       try {
          UserSignUpResponseDTO responseDTO = userService.create(dto);
@@ -59,19 +58,30 @@ public class UserController {
    // 서비스로 넘겨서, 로그인 유효성을 검증하세요. (비밀번호 암호화되어 있어요.)
    // 로그인 결과를 응답 상태 코드로 구분해서 보내 주세요.
    // 로그인이 성공했다면 200, 로그인 실패라면 400을 보내주세요.
-   @PostMapping
-   public ResponseEntity<?> login(@Validated @RequestBody LoginRequestDTO dto,
-                                  BindingResult result) {
-      log.info("/api/auth POST! - {}", dto);
+   @PostMapping("/signin")
+   public ResponseEntity<?> signIn(@Validated @RequestBody LoginRequestDTO dto,
+                                   BindingResult result) {
+      log.info("/api/auth/signin POST! - {}", dto);
 
+      ResponseEntity<FieldError> response = getFieldErrorResponseEntity(result);
+      if (response != null) return response;
+
+      try {
+         String authenticate = userService.authenticate(dto);
+         return ResponseEntity.ok().body(authenticate);
+      } catch (Exception e) {
+         return ResponseEntity.badRequest().body(e.getMessage());
+      }
+      
+   }
+
+
+   private static ResponseEntity<FieldError> getFieldErrorResponseEntity(BindingResult result) {
       if (result.hasErrors()) {
          log.warn(result.toString());
          return ResponseEntity.badRequest().body(result.getFieldError());
       }
-
-      userService.login(dto);
-
-
+      return null;
    }
 
 
