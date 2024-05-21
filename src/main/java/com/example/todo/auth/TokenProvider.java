@@ -37,26 +37,27 @@ public class TokenProvider {
       );
 
       // 토큰 생성
-      /*
-      {
-         "iss": "서비스 이름(발급자)",
-         "exp": "2023-12-27(만료일자)",
-         "iat": "2023-11-27(발급일자)",
-         "email": "로그인한 사람 이메일",
-         "role": "Premium"
-         ...
-         == 서명
-      }
-      */
+         /*
+            {
+                "iss": "서비스 이름(발급자)",
+                "exp": "2023-12-27(만료일자)",
+                "iat": "2023-11-27(발급일자)",
+                "email": "로그인한 사람 이메일",
+                "role": "Premium"
+                ...
+                == 서명
+            }
+         */
       // 추가 클레임 정의
       Map<String, String> claims = new HashMap<>();
       claims.put("email", userEntity.getEmail());
+      claims.put("role", userEntity.getRole().toString());
 
       return Jwts.builder()
-            // token Header에 들어갈 서명
+            //token Header에 들어갈 서명
             .signWith(
                   Keys.hmacShaKeyFor(SECRET_KEY.getBytes()),
-                  SignatureAlgorithm.ES512
+                  SignatureAlgorithm.HS512
             )
             // token payload에 들어갈 클레임 설정
             .setIssuer("Todo운영자") // iss: 발급자 정보
@@ -65,51 +66,6 @@ public class TokenProvider {
             .setSubject(userEntity.getId()) // sub: 토큰을 식별할 수 있는 주요 데이터
             .setClaims(claims)
             .compact();
-
    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
