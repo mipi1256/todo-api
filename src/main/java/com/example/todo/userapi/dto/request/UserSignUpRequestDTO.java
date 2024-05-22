@@ -6,10 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode (of = "email")
+@Setter @Getter @ToString
+@EqualsAndHashCode(of = "email")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,23 +25,16 @@ public class UserSignUpRequestDTO {
    @Size(min = 2, max = 5)
    private String userName;
 
-   public User toEntity() {
+   public User toEntity(String uploadedFilePath) {
       return User.builder()
             .email(email)
             .password(password)
             .userName(userName)
+            .profileImg(uploadedFilePath)
             .build();
    }
 
 }
-
-
-
-
-
-
-
-
 
 
 
