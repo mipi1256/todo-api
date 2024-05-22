@@ -24,40 +24,36 @@ public class TodoController {
 
    private final TodoService todoService;
 
-   // 할 일 추가
+   // 할 일 등록 요청
    @PostMapping
    public ResponseEntity<?> createTodo(
          // JwtAuthFilter에서 security에게 전역적으로 사용할 수 있는 인증 정보를 등록해 놓았기 때문에
          // @AuthenticationPrincipal을 통해 토큰에 인증된 사용자 정보를 불러올 수 있다.
          @AuthenticationPrincipal TokenUserInfo userInfo,
          @Validated @RequestBody TodoCreateRequestDTO requestDTO,
-         BindingResult result) {
-
+         BindingResult result
+   ) {
       log.info("/api/todos GET! - dto: {}", requestDTO);
+      log.info("TokenUserInfo: {}", userInfo);
       ResponseEntity<List<FieldError>> validatedResult = getValidatedResult(result);
       if (validatedResult != null) return validatedResult;
 
-      try {
-         TodoListResponseDTO responseDTO = todoService.create(requestDTO, userInfo.getUserId());
-         return ResponseEntity.ok().body(responseDTO);
-      } catch (Exception e) {
-         e.printStackTrace();
-         return ResponseEntity.internalServerError()
-               .body(TodoListResponseDTO.builder()
-                     .error(e.getMessage())
-                     .build());
-      }
+      TodoListResponseDTO responseDTO = todoService.create(requestDTO, userInfo.getUserId());
+      return ResponseEntity.ok().body(responseDTO);
    }
 
-   // 할 일 목록
+   // 할 일 목록 요청
    @GetMapping
-   public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal TokenUserInfo userInfo) {
+   public ResponseEntity<?> retrieveTodoList(
+         @AuthenticationPrincipal TokenUserInfo userInfo
+   ) {
       log.info("/api/todos GET request!");
       try {
          TodoListResponseDTO responseDTO = todoService.retrieve(userInfo.getUserId());
          return ResponseEntity.ok().body(responseDTO);
       } catch (Exception e) {
-         return ResponseEntity.internalServerError()
+         return ResponseEntity
+               .internalServerError()
                .body(TodoListResponseDTO.builder()
                      .error(e.getMessage())
                      .build());
@@ -66,12 +62,15 @@ public class TodoController {
 
    // 할 일 삭제 요청
    @DeleteMapping("/{id}")
-   public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal TokenUserInfo userInfo,
-         @PathVariable("id") String todoId) {
+   public ResponseEntity<?> deleteTodo(
+         @AuthenticationPrincipal TokenUserInfo userInfo,
+         @PathVariable("id") String todoId
+   ) {
       log.info("/api/todos/{} DELETE request!", todoId);
 
       if (todoId == null || todoId.trim().equals("")) {
-         return ResponseEntity.badRequest().body("ID를 전달해 주세요!");
+         return ResponseEntity.badRequest()
+               .body("ID를 전달해 주세요!");
       }
 
       try {
@@ -80,21 +79,23 @@ public class TodoController {
       } catch (Exception e) {
          return ResponseEntity.badRequest().body(e.getMessage());
       }
-
    }
 
-   // 할 일 체크 하기
+   // 할 일 수정하기
    @PatchMapping
-   public ResponseEntity<?> updateTodo(@AuthenticationPrincipal TokenUserInfo userInfo,
+   public ResponseEntity<?> updateTodo(
+         @AuthenticationPrincipal TokenUserInfo userInfo,
          @Validated @RequestBody TodoModifyRequestDTO requestDTO,
-                                       BindingResult result) {
+         BindingResult result
+   ) {
       ResponseEntity<List<FieldError>> validatedResult = getValidatedResult(result);
       if (validatedResult != null) return validatedResult;
 
       try {
          return ResponseEntity.ok().body(todoService.update(requestDTO, userInfo.getUserId()));
       } catch (Exception e) {
-         return ResponseEntity.internalServerError().body(e.getMessage());
+         return ResponseEntity.internalServerError()
+               .body(e.getMessage());
       }
 
    }
@@ -114,49 +115,4 @@ public class TodoController {
       return null;
    }
 
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
