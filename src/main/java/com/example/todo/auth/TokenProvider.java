@@ -35,7 +35,7 @@ public class TokenProvider {
    public String createToken(User userEntity) {
       // 토큰 만료 시간 생성
       Date expiry = Date.from(
-            Instant.now().plus(1, ChronoUnit.DAYS)
+            Instant.now().plus(30, ChronoUnit.SECONDS)
       );
 
       // 토큰 생성
@@ -62,7 +62,7 @@ public class TokenProvider {
                   SignatureAlgorithm.HS512
             )
             // token payload에 들어갈 클레임 설정
-            .setClaims(claims)
+            .setClaims(claims) // 추가 클레임을 먼저 설정해야 함.
             .setIssuer("Todo운영자") // iss: 발급자 정보
             .setIssuedAt(new Date()) // iat: 발급 시간
             .setExpiration(expiry) // exp: 만료 시간
@@ -75,13 +75,13 @@ public class TokenProvider {
     * 토큰을 json으로 파싱해서 클레임(토큰 정보)을 리턴
     *
     * @param token - 필터가 전달해 준 토큰
-    * @return - 토큰 안에 잇는 인증된 유저 정보를 반환
+    * @return - 토큰 안에 있는 인증된 유저 정보를 반환
     */
    public TokenUserInfo validateAndGetTokenUserInfo(String token) {
       Claims claims = Jwts.parserBuilder()
-            // 토큰 발급자의 발급 당시의 서명을 넣어줌.
+            //토큰 발급자의 발급 당시의 서명을 넣어줌.
             .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
-            // 서명 위조 검사: 위조된 경우네는 예외가 발생합니다.
+            // 서명 위조 검사: 위조된 경우에는 예외가 발생합니다.
             // 위조가 되지 않은 경우 payload를 리턴
             .build()
             .parseClaimsJws(token)
@@ -94,16 +94,8 @@ public class TokenProvider {
             .email(claims.get("email", String.class))
             .role(Role.valueOf(claims.get("role", String.class)))
             .build();
-
    }
 }
-
-
-
-
-
-
-
 
 
 
