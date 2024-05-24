@@ -97,7 +97,7 @@ public class UserController {
    @PutMapping("/promote")
    // 권한 검사 (해당 권한이 아니라면 인가처리 거부 -> 403 상태 리턴)
    // 메서드 호출 전에 검사 -> 요청 당시 토큰에 있는 user 정보가 ROLE_COMMON이라는 권한을 가지고 있는지를 검사.
-   @PreAuthorize("hasRole('ROLE_COMMON')")
+   // @PreAuthorize("hasRole('ROLE_COMMON')")
    public ResponseEntity<?> promote(
          @AuthenticationPrincipal TokenUserInfo userInfo
    ) {
@@ -171,7 +171,6 @@ public class UserController {
    }
 
 
-
    private MediaType findExtensionAndGetMediaType(String filePath) {
 
       // 파일 경로에서 확장자 추출
@@ -181,7 +180,8 @@ public class UserController {
 
       // 추출한 확장자를 바탕으로 MediaType을 설정 -> Header에 들어갈 Content-type이 됨.
       switch (ext.toUpperCase()) {
-         case "JPG": case "JPEG":
+         case "JPG":
+         case "JPEG":
             return MediaType.IMAGE_JPEG;
          case "PNG":
             return MediaType.IMAGE_PNG;
@@ -201,6 +201,7 @@ public class UserController {
       }
       return null;
    }
+
 
 }
 
